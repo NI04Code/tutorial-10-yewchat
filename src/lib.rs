@@ -1,6 +1,12 @@
 #![recursion_limit = "512"]
 
+mod components;
+mod services;
 
+use components::login::Login;
+use components::chat::Chat;
+// mod services;
+//
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -15,11 +21,6 @@ use wasm_bindgen::prelude::*;
 use yew::functional::*;
 use yew::prelude::*;
 use yew_router::prelude::*;
-
-mod components;
-mod services;
-use components::login::Login;
-use components::chat::Chat;
 
 // When the `wee_alloc` feature is enabled, this uses `wee_alloc` as the global
 // allocator.
@@ -38,6 +39,15 @@ pub enum Route {
     #[not_found]
     #[at("/404")]
     NotFound,
+}
+
+
+fn switch(selected_route: &Route) -> Html {
+    match selected_route {
+        Route::Login => html! {<Login />},
+        Route::Chat => html! {<Chat/>},
+        Route::NotFound => html! {<h1>{"404 baby"}</h1>},
+    }
 }
 
 #[function_component(Main)]
@@ -59,10 +69,9 @@ fn main() -> Html {
     }
 }
 
-fn switch(selected_route: &Route) -> Html {
-    match selected_route {
-        Route::Login => html! {<Login />},
-        Route::Chat => html! {<Chat/>},
-        Route::NotFound => html! {<h1>{"404 baby"}</h1>},
-    }
+#[wasm_bindgen]
+pub fn run_app() -> Result<(), JsValue> {
+    wasm_logger::init(wasm_logger::Config::default());
+    yew::start_app::<Main>();
+    Ok(())
 }

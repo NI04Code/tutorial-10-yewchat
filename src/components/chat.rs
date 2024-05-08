@@ -10,11 +10,13 @@ pub enum Msg {
     HandleMsg(String),
     SubmitMessage,
 }
+
 #[derive(Deserialize)]
 struct MessageData {
     from: String,
     message: String,
 }
+
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum MsgTypes {
@@ -22,6 +24,7 @@ pub enum MsgTypes {
     Register,
     Message,
 }
+
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct WebSocketMessage {
@@ -29,11 +32,13 @@ struct WebSocketMessage {
     data_array: Option<Vec<String>>,
     data: Option<String>,
 }
+
 #[derive(Clone)]
 struct UserProfile {
     name: String,
     avatar: String,
 }
+
 pub struct Chat {
     users: Vec<UserProfile>,
     chat_input: NodeRef,
@@ -44,6 +49,7 @@ pub struct Chat {
 impl Component for Chat {
     type Message = Msg;
     type Properties = ();
+
     fn create(ctx: &Context<Self>) -> Self {
         let (user, _) = ctx
             .link()
@@ -51,11 +57,13 @@ impl Component for Chat {
             .expect("context to be set");
         let wss = WebsocketService::new();
         let username = user.username.borrow().clone();
+
         let message = WebSocketMessage {
             message_type: MsgTypes::Register,
             data: Some(username.to_string()),
             data_array: None,
         };
+
         if let Ok(_) = wss
             .tx
             .clone()
@@ -63,6 +71,7 @@ impl Component for Chat {
         {
             log::debug!("message sent successfully");
         }
+
         Self {
             users: vec![],
             messages: vec![],
@@ -87,7 +96,7 @@ impl Component for Chat {
                                     "https://avatars.dicebear.com/api/adventurer-neutral/{}.svg",
                                     u
                                 )
-                                .into(),
+                                    .into(),
                             })
                             .collect();
                         return true;
@@ -128,6 +137,7 @@ impl Component for Chat {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let submit = ctx.link().callback(|_| Msg::SubmitMessage);
+
         html! {
             <div class="flex w-screen">
                 <div class="flex-none w-56 h-screen bg-gray-100">
@@ -156,21 +166,18 @@ impl Component for Chat {
                     <div class="w-full h-14 border-b-2 border-gray-300"><div class="text-xl p-3">{"💬 Chat!"}</div></div>
                     <div class="w-full grow overflow-auto border-b-2 border-gray-300">
                         {
-                            self.messages.iter().map(|m| {
+                            self.messages.iter().enumerate().map(|(index, m)| {
                                 let user = self.users.iter().find(|u| u.name == m.from).unwrap();
+                                let animation_delay = format!("{}s", index as f32 * 0.1);
                                 html!{
-                                    <div class="flex items-end w-3/6 bg-gray-100 m-8 rounded-tl-lg rounded-tr-lg rounded-br-lg ">
+                                    <div class="flex items-end w-3/6 bg-gray-100 m-8 rounded-tl-lg rounded-tr-lg rounded-br-lg chat-bubble" style={format!("animation-delay: {}", animation_delay)}>
                                         <img class="w-8 h-8 rounded-full m-3" src={user.avatar.clone()} alt="avatar"/>
                                         <div class="p-3">
                                             <div class="text-sm">
                                                 {m.from.clone()}
                                             </div>
                                             <div class="text-xs text-gray-500">
-                                                if m.message.ends_with(".gif") {
-                                                    <img class="mt-3" src={m.message.clone()}/>
-                                                } else {
-                                                    {m.message.clone()}
-                                                }
+                                                {m.message.clone()}
                                             </div>
                                         </div>
                                     </div>

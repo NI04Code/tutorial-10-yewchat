@@ -9,9 +9,11 @@ use crate::services::event_bus::{EventBus, Request};
 pub struct WebsocketService {
     pub tx: Sender<String>,
 }
+
 impl WebsocketService {
     pub fn new() -> Self {
         let ws = WebSocket::open("ws://127.0.0.1:8080").unwrap();
+
         let (mut write, mut read) = ws.split();
 
         let (in_tx, mut in_rx) = futures::channel::mpsc::channel::<String>(1000);
@@ -23,6 +25,7 @@ impl WebsocketService {
                 write.send(Message::Text(s)).await.unwrap();
             }
         });
+
         spawn_local(async move {
             while let Some(msg) = read.next().await {
                 match msg {
@@ -44,6 +47,7 @@ impl WebsocketService {
             }
             log::debug!("WebSocket Closed");
         });
+
         Self { tx: in_tx }
     }
 }
