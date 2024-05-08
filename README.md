@@ -9,3 +9,7 @@
 ![](assets/images/login.png) <br>
 ![](assets/images/chat.png) <br>
 ![](assets/images/chat2.png) <br>
+
+#### 3.2. Add some creativities to the webclient
+![](assets/images/loginwhite.png) <br>
+I just make the login background white :D
